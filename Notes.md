@@ -16,7 +16,31 @@ Scikit-allel has moved to [sgkit](https://sgkit-dev.github.io/sgkit/latest/index
 
 `sgkit.Fst()` and `sgkit.divergence()` are methods I might want to use
 
-TODO: understand cohorts in the context of sgkit
+## Prepare data
+
+Check that VCF file is sorted
+
+```sh
+zcat data/ProjTaxa.vcf.gz | grep -v '^#' | head | awk '{print $2}'
+zcat data/ProjTaxa.vcf.gz | grep -v '^#' | tail | awk '{print $2}'
+```
+The file appears to be sorted
+TODO: More robust check?
+
+```sh
+# AI-generated check
+zcat your_file.vcf.gz | grep -v "^#" | \
+awk 'BEGIN{last_pos=0; last_chr=""} 
+     {if($1==last_chr && $2<last_pos) {print "Unsorted at line " NR": "$1":"$2" comes after "$1":"last_pos; exit 1} 
+      last_chr=$1; last_pos=$2}'
+```
+
+
+
+## sgkit
+### Cohorts
+
+Cohorts are groups of samples (think population). They are defined as
 
 Claude suggestions for directory structure:
 
