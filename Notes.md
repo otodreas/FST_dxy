@@ -40,7 +40,9 @@ awk 'BEGIN{last_pos=0; last_chr=""}
 ## sgkit
 ### Cohorts
 
-Cohorts are groups of samples (think population). They are defined as
+Cohorts are groups of samples (think population). I did what the [docs](https://sgkit-dev.github.io/sgkit/latest/getting_started.html#cohorts) said to do
+
+## Organization
 
 Claude suggestions for directory structure:
 

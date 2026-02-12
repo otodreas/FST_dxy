@@ -9,37 +9,18 @@ The environment can be found in `environment.yaml`. It includes Jupyter (TODO: m
 
 ### Prepare data
 
-First, we must index the VCF file for improved access to data in downstream computation.
-
-This is done at the command line
-
-First, we drop the final column because we don't need the out group.
+To prepare, update permissions for the script
 
 ```sh
-zcat data/ProjTaxa.vcf.gz | awk '{NF--; print}' | bzip2 > data/ProjTaxa.vcf.gz
+chmod +x scripts/prepare_data.sh
 ```
 
-We check that the VCF file looks sorted:
+Now `cd` into the `data/` directory and run
 
 ```sh
-zcat data/ProjTaxa.vcf.gz | grep -v '^#' | head | awk '{print $2}'
-zcat data/ProjTaxa.vcf.gz | grep -v '^#' | tail | awk '{print $2}'
+../scripts/prepare_data.sh
 ```
 
-Now we can index it using samtools:
-
-```sh
-tabix -p vcf data/ProjTaxa.vcf.gz
-```
-
-And encode as Zarr file
-
-```sh
-# Convert to Intermediate Columnar Format
-vcf2zarr data/explode ProjTaxa.vcf.gz data/ProjTaxa.icf
-# Convert Intermediate Columnar Format to Zarr
-vcf2zarr encode data/ProjTaxa.icf data/ProjTaxa.vcz
-```
 
 ### Run analyses
 
