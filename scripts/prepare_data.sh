@@ -24,10 +24,8 @@ MAX_DEPTH=50
 bcftools view -s ^Naxos2 "$VCF_Z" | \
 # Drop indels
 bcftools view -v snps | \
-# Filter by quality
-bcftools filter -i 'QUAL<60' | \
-# Filter by depth
-bcftools filter -i 'INFO/DP>3 & INFO/DP<50' -O z -o "$VCF_Z_F" #| \
+# Filter across all samples at a site
+bcftools filter -i 'QUAL<6247 & INFO/DP>16320696 & INFO/DP<81603482' -O z -o "$VCF_Z_F" #| \
 # Genotype-level filtering
 # bcftools +setGT -O z -o "$VCF_Z_F" -- -t q -n . -i 'FMT/GQ<20 | FMT/DP<5 | FMT/DP>60'
 
