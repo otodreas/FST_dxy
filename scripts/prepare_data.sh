@@ -11,19 +11,30 @@ CWD="$(pwd)"
 
 # Set filename variables
 VCF_Z="$CWD/ProjTaxa.vcf.gz"
-VCF_Z_CLEAN="$CWD/ProjTaxaClean.vcf.gz"
+VCF_Z_F="$CWD/ProjTaxaFilt.vcf.gz"
+
+# Set filters
+# MAF=0.1
+MISS=0.5
+# QUAL=30
+MIN_DEPTH=2.5
+MAX_DEPTH=50
 
 # Drop outgroup
-bcftools view -s ^Naxos2 "$VCF_Z" -Oz -o "$VCF_Z_CLEAN"
+bcftools view -s ^Naxos2 "$VCF_Z" | \
+# Drop indels
+bcftools view -v snps | \
+# Filter by quality
+bcftools filter -i 'QUAL<60' | \
+# Filter by depth
+bcftools filter -i 'INFO/DP>3 & INFO/DP<50' -O z -o "$VCF_Z_F" #| \
+# Genotype-level filtering
+# bcftools +setGT -O z -o "$VCF_Z_F" -- -t q -n . -i 'FMT/GQ<20 | FMT/DP<5 | FMT/DP>60'
 
-# # Check that the data look sorted
-# zcat $VCFZ | grep -v '^#' | head | awk '{print $2}'
-# zcat $VCFZ | grep -v '^#' | tail | awk '{print $2}'
+# # Create index file
+# tabix -p vcf "$VCF_Z_F"
 
-# Create index file
-tabix -p vcf "$VCF_Z_CLEAN"
-
-# Convert to Intermediate Columnar Format
-vcf2zarr explode "$VCF_Z_CLEAN" "$CWD/ProjTaxa.icf"
-# Convert Intermediate Columnar Format to Zarr
-vcf2zarr encode "$CWD/ProjTaxa.icf" "$CWD/ProjTaxa.vcz"
+# # Convert to Intermediate Columnar Format
+# vcf2zarr explode "$VCF_Z_F" "$CWD/ProjTaxa.icf"
+# # Convert Intermediate Columnar Format to Zarr
+# vcf2zarr encode "$CWD/ProjTaxa.icf" "$CWD/ProjTaxa.vcz"

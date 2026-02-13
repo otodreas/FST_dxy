@@ -8,6 +8,8 @@ grep -v '^#' $VCF | awk '{print $5}' | grep -c "\."
 
 So using pixy is not possible.
 
+The divergence is not absolute by definition because we dont have the invariant sites.
+
 The other options are
 - VCFtools for FST
 - scikit-allel or PopGenome (R) for dxy
@@ -36,6 +38,23 @@ awk 'BEGIN{last_pos=0; last_chr=""}
 ```
 
 TODO: prune environment (r packages, etc?), heatmap for visualization as opposed to manhattan plot?
+
+FST can be falsely high at sites with low coverage (?)
+DXY can be noisy
+
+## filtering
+
+Filtering involves deleting rows or changing indivduals. For example, if an invididial has `C` where the reference has `G` but the quality is really low, the individual will be switched to `./.` at that location.
+
+try looking at just biallelic snps
+
+### depth
+
+2x-3x mean of coverage for a particular site means those reads are probably not supposed to be there -> we see variation thats not supposed to be there because the hypothesis is that those reads were mapped wrong.
+
+If you have really low depth, youre also in trouble because it means you had really few reads for that location. you also need a lower cutoff. go for ca 50% of mean
+
+TODO: search literature for standard 
 
 ## sgkit
 ### Cohorts
