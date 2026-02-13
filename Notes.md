@@ -35,7 +35,7 @@ awk 'BEGIN{last_pos=0; last_chr=""}
       last_chr=$1; last_pos=$2}'
 ```
 
-
+TODO: prune environment (r packages, etc?), heatmap for visualization as opposed to manhattan plot?
 
 ## sgkit
 ### Cohorts

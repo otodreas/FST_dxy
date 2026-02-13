@@ -4,12 +4,11 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Define filename variables
-VCF="$SCRIPT_DIR/../data/ProjTaxa.vcf"
+VCF_Z="$SCRIPT_DIR/../data/ProjTaxa.vcf.gz"
 VCF_TEST="$SCRIPT_DIR/ProjTaxa.vcf"
 
-# Create test file
-head -n 2393 $VCF > $VCF_TEST
-tail -n 50 $VCF >> $VCF_TEST
+# Sample VCF (this is really slow for some reason)
+bcftools view $VCF_Z | vcfrandomsample -r 0.01 > $VCF_TEST
 
 # Zip
 bgzip -k $VCF_TEST
