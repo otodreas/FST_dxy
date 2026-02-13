@@ -20,14 +20,25 @@ MISS=0.5
 MIN_DEPTH=2.5
 MAX_DEPTH=50
 
-# Drop outgroup
-bcftools view -s ^Naxos2 "$VCF_Z" | \
-# Drop indels
-bcftools view -v snps | \
-# Filter across all samples at a site
-bcftools filter -i 'QUAL<6247 & INFO/DP>16320696 & INFO/DP<81603482' -O z -o "$VCF_Z_F" #| \
-# Genotype-level filtering
-# bcftools +setGT -O z -o "$VCF_Z_F" -- -t q -n . -i 'FMT/GQ<20 | FMT/DP<5 | FMT/DP>60'
+
+vcftools --gzvcf "$VCF_Z" \
+  --min-meanDP 2.5 \
+  --max-meanDP 50 \
+  --recode --stdout | \
+bcftools view -s ^Naxos2 -m2 -M2 -v snps | \
+bcftools filter -i 'QUAL>30 & QUAL<6000' -O z -o "$VCF_Z_F" #| \
+# bcftools +setGT -- -t q -n . -i 'FMT/GQ<20 | FMT/DP<5' -O z -o "$VCF_Z_F"
+
+
+# # Drop outgroup
+# bcftools view -s ^Naxos2 -m2 -M2 -v snps "$VCF_Z" | \
+# # Keep only biallelic SNPs
+# # bcftools view -m2 -M2 -v snps | \
+# bcftools filter -i 'QUAL>30' -O z -o "$VCF_Z_F"
+# # Filter across all samples at a site
+# # bcftools filter -i 'QUAL<6247 & INFO/DP>16320696 & INFO/DP<81603482' -O z -o "$VCF_Z_F" #| \
+# # Genotype-level filtering
+# # bcftools +setGT -O z -o "$VCF_Z_F" -- -t q -n . -i 'FMT/GQ<20 | FMT/DP<5 | FMT/DP>60'
 
 # # Create index file
 # tabix -p vcf "$VCF_Z_F"
