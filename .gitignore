@@ -208,3 +208,6 @@ __marimo__/
 
 # Project data
 data/
+test/*
+!/test/*.sh
+!/test/ProjTaxa.vcf.gz

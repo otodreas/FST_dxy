@@ -44,6 +44,8 @@ DXY can be noisy
 
 ## filtering
 
+Mention that we are filtering with hard numbers because we dont have a ground truth set
+
 Filtering involves deleting rows or changing indivduals. For example, if an invididial has `C` where the reference has `G` but the quality is really low, the individual will be switched to `./.` at that location.
 
 try looking at just biallelic snps

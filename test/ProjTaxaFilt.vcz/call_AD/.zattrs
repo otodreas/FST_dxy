@@ -1,8 +1,0 @@
-{
-    "_ARRAY_DIMENSIONS": [
-        "variants",
-        "samples",
-        "FORMAT_AD_dim"
-    ],
-    "description": "Allelic depths for the ref and alt alleles in the order listed"
-}
