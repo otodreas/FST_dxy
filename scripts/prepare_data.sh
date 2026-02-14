@@ -5,18 +5,22 @@
 # Zarr directories in whatever directory you are in
 
 
-# Set directory variables
+# Assign directory to variable
 CWD="$(pwd)"
 
 # Set filename variables
 VCF_Z="$CWD/ProjTaxa.vcf.gz"
 VCF_Z_F="$CWD/ProjTaxaFilt.vcf.gz"
 
-# Filter data
+
+# TODO: understand what each step is doing. why is missingness going up in .lmiss and .imiss files, etc
+
+# Filter data with vcftools
   # Remove outgroup (Naxos2)
   # Keep biallelic SNPs only
   # Filter by quality by genotypes (GQ>30)
   # Filter by sample depth by genotypes (2.5<DP<70)
+  # Filter by minor allele by sites (minor allele count>=2)
   # Filter by mean depth by sites (5<meanDP<50)
   # Filter by missingness by sites (exclude missing>90%)
   # Recode output to VCF with all metadata
@@ -24,10 +28,11 @@ VCF_Z_F="$CWD/ProjTaxaFilt.vcf.gz"
 vcftools --gzvcf "$VCF_Z" \
   --remove-indv Naxos2 \
   --remove-indels --min-alleles 2 --max-alleles 2 \
-  --minGQ 30 \
+  --minGQ 20 \
   --minDP 2.5 --maxDP 70 \
+  --mac 2 \
   --min-meanDP 5 --max-meanDP 50 \
-  --max-missing 0.1 \
+  --max-missing 0.8 \
   --recode --recode-INFO-all \
   --stdout | \
   bcftools view -O z -o "$VCF_Z_F"
