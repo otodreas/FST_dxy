@@ -22,7 +22,7 @@ VCF_Z_F="$CWD/ProjTaxaFilt.vcf.gz"
   # Filter by sample depth by genotypes (2.5<DP<70)
   # Filter by minor allele by sites (minor allele count>=2)
   # Filter by mean depth by sites (5<meanDP<50)
-  # Filter by missingness by sites (exclude missing>90%)
+  # Filter by missingness by sites (exclude missing>3 samples)
   # Recode output to VCF with all metadata
   # Pipe output into bcftools to encode in a bgzipped file
 vcftools --gzvcf "$VCF_Z" \
@@ -32,7 +32,7 @@ vcftools --gzvcf "$VCF_Z" \
   --minDP 2.5 --maxDP 70 \
   --mac 2 \
   --min-meanDP 5 --max-meanDP 50 \
-  --max-missing 0.8 \
+  --max-missing-count 3 \
   --recode --recode-INFO-all \
   --stdout | \
   bcftools view -O z -o "$VCF_Z_F"
