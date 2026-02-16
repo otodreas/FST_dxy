@@ -63,6 +63,10 @@ TODO: search literature for standard
 
 Cohorts are groups of samples (think population). I did what the [docs](https://sgkit-dev.github.io/sgkit/latest/getting_started.html#cohorts) said to do
 
+## Correlation
+
+use spearman if you think the data are not normal. make note in report
+
 ## Organization
 
 Claude suggestions for directory structure:
