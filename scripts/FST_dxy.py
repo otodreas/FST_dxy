@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 # Import libraries
+import sys
 import argparse as ap
 import sgkit as sg
 import xarray as xr
@@ -30,6 +31,10 @@ def parse_args() -> ap.Namespace:
     # Add arguments
     parser.add_argument("filename")
     parser.add_argument("-o", "--output")
+    parser.add_argument("-p", "--plot")
+
+    if not parser.parse_args().filename.endswith(".vcz"):
+        sys.exit("Input must be .vcz")
 
     # Return parsed arguments
     return parser.parse_args()
@@ -65,7 +70,7 @@ def load_data(args: ap.Namespace) -> list:
     return [ds.isel(variants=mask_5), ds.isel(variants=mask_Z)]
 
 
-def compute_stats(ds: list) -> list:
+def compute_new_dims(ds: list) -> list:
     """
     Merge windows, FST and dxy dimensions into each chromosomes dataset
 
@@ -87,7 +92,7 @@ def compute_stats(ds: list) -> list:
     return ds
 
 
-def make_plot(ds: list, args: ap.Namespace):
+def make_output(ds: list, args: ap.Namespace):
     """
     Create and save plot, save statistics as tsv.
 
@@ -113,6 +118,9 @@ def make_plot(ds: list, args: ap.Namespace):
         figsize=(6, 3.5),
         constrained_layout=True,
     )
+
+    # Create list to store statistics in
+    stats = []
 
     # Loop through subplot rows
     for i in range(ax.shape[0]):
@@ -201,9 +209,13 @@ def make_plot(ds: list, args: ap.Namespace):
         label="Window order",
     )
 
-    # Save plot
+    # Save stats
     if args.output:
-        plt.savefig(args.output)
+        pass
+
+    # Save plot
+    if args.plot:
+        plt.savefig(args.plot)
 
 
 def main():
@@ -213,8 +225,8 @@ def main():
     """
     args = parse_args()
     ds = load_data(args)
-    ds = compute_stats(ds)
-    make_plot(ds, args)
+    ds = compute_new_dims(ds)
+    make_output(ds, args)
 
 
 # Run program
