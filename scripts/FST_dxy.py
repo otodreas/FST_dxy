@@ -32,8 +32,8 @@ def parse_args() -> ap.Namespace:
 
     # Add arguments
     parser.add_argument("filename")
-    parser.add_argument("-o", "--output")
-    parser.add_argument("-p", "--plot")
+    parser.add_argument("-o", "--output", help="Name of csv with correlation statistics")
+    parser.add_argument("-p", "--plot", help="Name of plot to be saved")
 
     # Assign parsed arguments to object
     args = parser.parse_args()
@@ -42,21 +42,20 @@ def parse_args() -> ap.Namespace:
     if not os.path.isdir(os.path.realpath(args.filename)):
         sys.exit("Input is invalid or does not exist")
 
+    if not args.filename.endswith(".vcz"):
+        sys.exit("Input must be .vcz")
+
     if not os.path.isdir(os.path.dirname(args.output)):
         sys.exit("Output directory does not exist")
 
     if not os.path.isdir(os.path.dirname(args.plot)):
         sys.exit("Plot directory does not exist")
 
-    if not args.filename.endswith(".vcz"):
-        sys.exit("Input must be .vcz")
-    
     if not args.output.endswith(".csv"):
         sys.exit("Output summary must be .csv")
-    
+
     if not args.plot.endswith((".png", ".pdf", ".jpeg", ".jpg", ".svg")):
         sys.exit("Invalid plot filetype")
-
 
     # Return parsed arguments
     return args
@@ -150,7 +149,7 @@ def make_output(ds: list, args: ap.Namespace):
         for j in range(ax.shape[1]):
             # Assign the two cohorts being compared to `comparison`
             comparison = f"{cohort_names[x[j, 0]]} vs {cohort_names[x[j, 1]]}"
-            
+
             # Assign FST values for a give population comparison to array
             fst = ds[i].stat_Fst.values[:, x[j, 0], x[j, 1]]
 
