@@ -12,9 +12,11 @@
 
 \section{Introduction}
 
-To examine the relationship between genetic differentiation and divergence for correlation, those metrics must first be understood. Differentiation, or \textit{fixation index} ($F_{ST}$), is an estimation of population differentiation. Divergence, or in the case of this paper, \textit{per-site divergence} ($d_{XY}$) is the direct nucleotide divergence between populations. They are calculated in fundamentally different ways. $F_{ST}$ is defined as the average frequency of an allele among different populations, balanced by the sizes of those populations, while $d_{XY}$ is defined simply as the proportion of sites that differ between populations. In other words, one takes into account weights and is thought of in the context of probabilities, while the other is a fraction. To determine if these are correlated, we built a pipeline to answer this question.
+To examine the relationship between genetic differentiation and divergence for correlation, those metrics must first be understood. Differentiation, or \textit{fixation index} ($F_{ST}$), is an estimation of population differentiation. Divergence, or in the case of this paper, \textit{per-site divergence} ($d_{XY}$) is the direct nucleotide divergence between populations. They are calculated in fundamentally different ways. $F_{ST}$ is defined as the average frequency of an allele among different populations, balanced by the sizes of those populations, while $d_{XY}$ is defined simply as the proportion of sites that differ between populations. In other words, one takes into account weights and is thought of in the context of probabilities, while the other is a fraction. To determine if these are correlated, we built a pipeline to answer this question. The pipeline consists of filtering, data conversion, parameter and statistics calculations, and plotting using a variety of bioinformatic tools.
 
 \section{Methods}
+
+We were supplied with a dataset in the form of a Variant Calling Format (VCF) file. A filtering step was applied using hard filters in VCFtools at both the genotype and variant level in lieu of a truth set. Only biallelic SNPs passed the filter. Any genotypes with Phred scores below 20 was set to missing, as well as any genotypes with sequencing depths outside the range of 5–70. Then, sites with missingness of 10\% or more were excluded.
 
 \section{Conclusions}
 
