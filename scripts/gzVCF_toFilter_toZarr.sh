@@ -1,16 +1,19 @@
 #!/usr/bin/env bash
 
+: '
+This script takes bgzipped VCF files and cleans them up and turns them into
+Zarr directories in whatever directory you are in
 
-# This script takes bgzipped VCF files and cleans them up and turns them into
-# Zarr directories in whatever directory you are in
-
+The program 
+'
 
 # Assign directory to variable
 CWD="$(pwd)"
 
 # Set filename variables
-VCF_Z="$CWD/ProjTaxa.vcf.gz"
-VCF_Z_F="$CWD/ProjTaxaFilt.vcf.gz"
+VCF_Z="$CWD/$1"
+DATA_DIR=$(dirname "$VCF_Z")
+VCF_Z_F="$DATA_DIR/Filtered.vcf.gz"
 
 # Filter data with vcftools
   # Remove outgroup (Naxos2)
@@ -20,6 +23,7 @@ VCF_Z_F="$CWD/ProjTaxaFilt.vcf.gz"
   # Filter by missingness by sites (missingness<=10%)
   # Recode output to VCF with all metadata
   # Pipe output into bcftools to encode in a bgzipped file
+echo "1/2: Filtering bgzipped VCF file..."
 vcftools --gzvcf "$VCF_Z" \
   --remove-indv Naxos2 \
   --remove-indels --min-alleles 2 --max-alleles 2 \
@@ -31,9 +35,14 @@ vcftools --gzvcf "$VCF_Z" \
   bcftools view -O z -o "$VCF_Z_F"
 
 # Index filtered VCF file
+echo "1/2: Indexing filtered bgzipped VCF file..."
 bcftools index "$VCF_Z_F"
 
 # Convert to Intermediate Columnar Format
-vcf2zarr explode "$VCF_Z_F" "$CWD/ProjTaxaFilt.icf"
+echo "1/2: Converting filtered bgzipped VCF file to Intermediate Columnar Format..."
+vcf2zarr explode "$VCF_Z_F" "$DATA_DIR/Filtered.icf"
+echo "Intermediate data written to $DATA_DIR/Filtered.icf"
 # Convert Intermediate Columnar Format to Zarr
-vcf2zarr encode "$CWD/ProjTaxaFilt.icf" "$CWD/ProjTaxaFilt.vcz"
+echo "1/2: Converting Intermediate Columnar Format file to Zarr..."
+vcf2zarr encode "$DATA_DIR/Filtered.icf" "$DATA_DIR/Filtered.vcz"
+echo "Zarr data written to $DATA_DIR/Filtered.vcz"

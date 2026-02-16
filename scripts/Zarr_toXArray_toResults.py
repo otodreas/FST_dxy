@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 # Import libraries
+print("2/2: Importing libraries...")
 import sys
 import os
 import csv
@@ -20,6 +21,9 @@ def parse_args() -> ap.Namespace:
     :return: An object with the parsed arguments
     :rtype: argparse.Namespace
     """
+    print("2/2: Parsing arguments...")
+
+    # Instantiate argument parser
     parser = ap.ArgumentParser(
         prog="FST_dxy",
         description=(
@@ -34,6 +38,7 @@ def parse_args() -> ap.Namespace:
     parser.add_argument("filename")
     parser.add_argument("-o", "--output", help="Name of csv with correlation statistics")
     parser.add_argument("-p", "--plot", help="Name of plot to be saved")
+    # TODO: window size arg or var
 
     # Assign parsed arguments to object
     args = parser.parse_args()
@@ -42,20 +47,22 @@ def parse_args() -> ap.Namespace:
     if not os.path.isdir(os.path.realpath(args.filename)):
         sys.exit("Input is invalid or does not exist")
 
-    if not args.filename.endswith(".vcz"):
+    if not args.filename.endswith((".vcz", ".vcz/")):
         sys.exit("Input must be .vcz")
 
-    if not os.path.isdir(os.path.dirname(args.output)):
-        sys.exit("Output directory does not exist")
+    if args.output:
+        if not os.path.isdir(os.path.dirname(args.output)):
+            sys.exit("Output directory does not exist")
+        
+        if not args.output.endswith((".csv", "csv/")):
+            sys.exit("Output summary must be .csv")
 
-    if not os.path.isdir(os.path.dirname(args.plot)):
-        sys.exit("Plot directory does not exist")
+    if args.plot:
+        if not os.path.isdir(os.path.dirname(args.plot)):
+            sys.exit("Plot directory does not exist")
 
-    if not args.output.endswith(".csv"):
-        sys.exit("Output summary must be .csv")
-
-    if not args.plot.endswith((".png", ".pdf", ".jpeg", ".jpg", ".svg")):
-        sys.exit("Invalid plot filetype")
+        if not args.plot.endswith((".png", ".pdf", ".jpeg", ".jpg", ".svg")):
+            sys.exit("Invalid plot filetype")
 
     # Return parsed arguments
     return args
@@ -71,6 +78,7 @@ def load_data(args: ap.Namespace) -> list:
     :return: one xarray.Dataset per chromosome in a list
     :rtype: list
     """
+    print("2/2: Converting Zarr to xArray.Dataset...")
 
     # Load data into an xarray.Dataset object
     ds = sg.load_dataset(args.filename)
@@ -93,18 +101,22 @@ def load_data(args: ap.Namespace) -> list:
 
 def compute_new_dims(ds: list) -> list:
     """
-    Merge windows, FST and dxy dimensions into each chromosomes dataset
+    Merge windows (10,000 variants), FST and dxy dimensions into each chromosomes dataset
 
     :param ds: a list of xarray.Datasets, one per chromosome
     :type ds: list
     :return: The same list, but each xarray.Dataset has window, FST, and dxy dimensions merged into it
     :rtype: list
     """
+    print("2/2: Computing windowed FST and dxy...")
 
     # Loop over the index of each dataset by chromosome
     for i in range(len(ds)):
         # Merge windows into dataset
-        ds[i] = sg.window_by_variant(ds[i], size=80)
+        ds[i] = sg.window_by_variant(ds[i], size=10_000)
+
+        # Chunk the variants to the window size
+        ds[i] = ds[i].chunk(chunks={"variants": 10_000}) 
 
         # Merge FST and dxy into dataset (both are computed with the `sg.Fst()` method)
         ds[i] = sg.Fst(ds[i])
@@ -122,6 +134,7 @@ def make_output(ds: list, args: ap.Namespace):
     :param args: arguments from command line. All arguments but filename are used
     :type args: ap.Namespace
     """
+    print("2/2: Generating plot and Pearsons correlation table...")
 
     # Create tuples with cohort and chromosome names
     cohort_names = ("8N", "K", "Lesina")
@@ -154,17 +167,18 @@ def make_output(ds: list, args: ap.Namespace):
             fst = ds[i].stat_Fst.values[:, x[j, 0], x[j, 1]]
 
             # Assign dxy values for a given population comparison to array
-            dxy = ds[i].stat_divergence.values[:, x[j, 0], x[j, 1]]
+            dxy = ds[i].stat_divergence.values[:, x[j, 0], x[j, 1]] / 10_000
 
             # Assign correlation stats to scipy SignificanceResult
             corr = sp.spearmanr(fst, dxy)
+            print(type(ds[0].stat_divergence.values))
 
             # Extract rounded values to plot from correlation stats
             stats_row = []
             corr_round = []
             for stat in corr:
-                # Append stat to row of output file
-                stats_row.append(stat)
+                # Append stat to row of output file as text string
+                stats_row.append(str(stat))
 
                 # Use scientific notation if exceedingly small
                 if stat < 0.005:
@@ -183,7 +197,7 @@ def make_output(ds: list, args: ap.Namespace):
                 x=fst,
                 y=dxy,
                 # Color scale
-                c=ds[i].window_start.values / ds[-1].window_stop.values[-1],
+                c=ds[i].window_start.values / ds[i].window_start.values[-1],
                 cmap="managua",
                 # Point aesthetics
                 s=50,
@@ -211,9 +225,7 @@ def make_output(ds: list, args: ap.Namespace):
                 t_lab.set_xticks([])
 
                 # Set text label
-                t_lab.set_xlabel(
-                    f"{cohort_names[x[j, 0]]} vs {cohort_names[x[j, 1]]}", labelpad=8
-                )
+                t_lab.set_xlabel(comparison, labelpad=8)
 
             # Set x label on bottom plots
             else:
@@ -238,17 +250,24 @@ def make_output(ds: list, args: ap.Namespace):
         location="right",
         aspect=25,
         pad=0.035,
-        label="Window order",
+        label="Normalized window index\n(Window size: 10,000 variants)",
     )
 
     # Save stats
     if args.output:
         with open(args.output, "w") as f:
             csv.writer(f).writerows(stats_out)
+            print(f"FST-dxy Pearson correlations written to {args.output}")
+    
+    else:
+        print("FST-dxy Pearson correclations by group:")
+        for row in stats_out:
+            sys.stdout.write("\t".join(row) + "\n")
 
     # Save plot
     if args.plot:
         plt.savefig(args.plot)
+        print(f"FST-dxy plot written to {args.plot}")
 
 
 def main():
