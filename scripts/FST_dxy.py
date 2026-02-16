@@ -72,7 +72,7 @@ def make_plot(ds: list, args: ap.Namespace):
     x = np.array([(0, 1), (0, 2), (1, 2)])
 
     # Create subplots
-    fig, ax = plt.subplots(2, 3, sharex=True, sharey=True, figsize=(6, 3), )
+    fig, ax = plt.subplots(2, 3, sharex=True, sharey=True, figsize=(6, 3.5), constrained_layout=True)
 
     # Loop through subplot rows
     for i in range(ax.shape[0]):
@@ -104,7 +104,7 @@ def make_plot(ds: list, args: ap.Namespace):
                 dxy,
 
                 # Color scale
-                c=ds[i].window_start.values / ds[-1].window_stop.values[-1] * 100,
+                c=ds[i].window_start.values / ds[-1].window_stop.values[-1],
                 cmap="managua",
 
                 # Point aesthetics
@@ -115,7 +115,7 @@ def make_plot(ds: list, args: ap.Namespace):
             # Place stats in subplots
             ax[i, j].text(
                 # Top right
-                x=0.95,
+                x=0.05,
                 y=0.95,
 
                 # Latex-style and f-string style formatting
@@ -128,8 +128,8 @@ def make_plot(ds: list, args: ap.Namespace):
                 # Assign coordinates to the axes-relative space rather than real x-y values
                 transform=ax[i, j].transAxes,
 
-                # Align right and top
-                ha='right',
+                # Align left and top
+                ha='left',
                 va='top'
             )
 
@@ -168,8 +168,8 @@ def make_plot(ds: list, args: ap.Namespace):
         # Aesthetics
         location="right",
         aspect=25, 
-        pad=0.09,
-        label='Ordered windows (% Chromosome Length)'
+        pad=0.035,
+        label="Window order"
     )
 
     # Save plot
