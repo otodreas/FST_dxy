@@ -7,12 +7,16 @@ import xarray as xr
 import numpy as np
 import scipy.stats as sp
 import matplotlib.pyplot as plt
-import matplotlib.transforms as trans
 
 
 # Define functions
 def parse_args() -> ap.Namespace:
-    # Define parser
+    """
+    Parse arguments passed at the command line
+
+    :return: An object with the parsed arguments
+    :rtype: argparse.Namespace
+    """
     parser = ap.ArgumentParser(
         prog="FST_dxy",
         description=(
@@ -20,7 +24,7 @@ def parse_args() -> ap.Namespace:
             + "converts it to an xarray.Dataset object, computes pairwise "
             + "windowed FST and dxy, and generates scatterplots."
         ),
-        epilog="Author: Oliver Todreas"
+        epilog="Author: Oliver Todreas",
     )
 
     # Add arguments
@@ -30,7 +34,18 @@ def parse_args() -> ap.Namespace:
     # Return parsed arguments
     return parser.parse_args()
 
+
 def load_data(args: ap.Namespace) -> list:
+    """
+    Load data from Zarr (vcz), assign cohorts (populations), chromosomes, split
+    into 2 datasets and return list of two datasets
+
+    :param args: Parsed arguments. Only uses the `filename` argument
+    :type args: ap.Namespace
+    :return: one xarray.Dataset per chromosome in a list
+    :rtype: list
+    """
+
     # Load data into an xarray.Dataset object
     ds = sg.load_dataset(args.filename)
 
@@ -49,21 +64,39 @@ def load_data(args: ap.Namespace) -> list:
     # Return a list storing two datasets that are subsets of the original dataset
     return [ds.isel(variants=mask_5), ds.isel(variants=mask_Z)]
 
+
 def compute_stats(ds: list) -> list:
+    """
+    Merge windows, FST and dxy dimensions into each chromosomes dataset
+
+    :param ds: a list of xarray.Datasets, one per chromosome
+    :type ds: list
+    :return: The same list, but each xarray.Dataset has window, FST, and dxy dimensions merged into it
+    :rtype: list
+    """
+
     # Loop over the index of each dataset by chromosome
     for i in range(len(ds)):
-
         # Merge windows into dataset
         ds[i] = sg.window_by_variant(ds[i], size=80)
 
         # Merge FST and dxy into dataset (both are computed with the `sg.Fst()` method)
         ds[i] = sg.Fst(ds[i])
-    
-    ds
+
     # Return the list of merged datasets
     return ds
 
+
 def make_plot(ds: list, args: ap.Namespace):
+    """
+    Create and save plot, save statistics as tsv.
+
+    :param ds: list of xarray.Datasets with window, FST, and dxy dimensions
+    :type ds: list
+    :param args: arguments from command line. All arguments but filename are used
+    :type args: ap.Namespace
+    """
+
     # Create tuples with cohort and chromosome names
     cohort_names = ("8N", "K", "Lesina")
     chrom_names = ("Chromosome 5", "Chromosome Z")
@@ -72,7 +105,14 @@ def make_plot(ds: list, args: ap.Namespace):
     x = np.array([(0, 1), (0, 2), (1, 2)])
 
     # Create subplots
-    fig, ax = plt.subplots(2, 3, sharex=True, sharey=True, figsize=(6, 3.5), constrained_layout=True)
+    fig, ax = plt.subplots(
+        nrows=2,
+        ncols=3,
+        sharex=True,
+        sharey=True,
+        figsize=(6, 3.5),
+        constrained_layout=True,
+    )
 
     # Loop through subplot rows
     for i in range(ax.shape[0]):
@@ -100,16 +140,14 @@ def make_plot(ds: list, args: ap.Namespace):
             # Draw a scatter plot
             scatter = ax[i, j].scatter(
                 # Plot FST on x and dxy on y
-                fst,
-                dxy,
-
+                x=fst,
+                y=dxy,
                 # Color scale
                 c=ds[i].window_start.values / ds[-1].window_stop.values[-1],
                 cmap="managua",
-
                 # Point aesthetics
                 s=50,
-                alpha=1/3
+                alpha=0.3,
             )
 
             # Place stats in subplots
@@ -117,20 +155,13 @@ def make_plot(ds: list, args: ap.Namespace):
                 # Top right
                 x=0.05,
                 y=0.95,
-
                 # Latex-style and f-string style formatting
-                s=(
-                    fr"$\rho = {corr_round[0]}$"
-                    + "\n"
-                    + fr"$p = {corr_round[1]}$"
-                ),
-
+                s=(rf"$\rho = {corr_round[0]}$" + "\n" + rf"$p = {corr_round[1]}$"),
                 # Assign coordinates to the axes-relative space rather than real x-y values
                 transform=ax[i, j].transAxes,
-
                 # Align left and top
-                ha='left',
-                va='top'
+                ha="left",
+                va="top",
             )
 
             # Set population comparison labels on top plots
@@ -141,8 +172,7 @@ def make_plot(ds: list, args: ap.Namespace):
 
                 # Set text label
                 t_lab.set_xlabel(
-                    f"{cohort_names[x[j, 0]]} vs {cohort_names[x[j, 1]]}",
-                    labelpad=8
+                    f"{cohort_names[x[j, 0]]} vs {cohort_names[x[j, 1]]}", labelpad=8
                 )
 
             # Set x label on bottom plots
@@ -155,7 +185,7 @@ def make_plot(ds: list, args: ap.Namespace):
         # Assign twin axis to `r_lab` and remove ticks
         r_lab = ax[i, -1].twinx()
         r_lab.set_yticks([])
-        
+
         # Set chromosome labels on right plots
         r_lab.set_ylabel(chrom_names[i], rotation=90, labelpad=8)
 
@@ -164,19 +194,23 @@ def make_plot(ds: list, args: ap.Namespace):
         # Use scatter plot data
         mappable=scatter,
         ax=ax,
-
         # Aesthetics
         location="right",
-        aspect=25, 
+        aspect=25,
         pad=0.035,
-        label="Window order"
+        label="Window order",
     )
 
     # Save plot
     if args.output:
-        plt.savefig(args.output)#, bbox_inches=trans.Bbox([[0, 0], [0, 0.5]]))
+        plt.savefig(args.output)
+
 
 def main():
+    """
+    Parse command line arguments, load data into xarray.Datasets, merge new
+    dimensions into xarray.Datasets, create and save plots and outputs in tsv
+    """
     args = parse_args()
     ds = load_data(args)
     ds = compute_stats(ds)
