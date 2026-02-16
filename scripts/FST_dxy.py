@@ -2,6 +2,8 @@
 
 # Import libraries
 import sys
+import os
+import csv
 import argparse as ap
 import sgkit as sg
 import xarray as xr
@@ -33,11 +35,31 @@ def parse_args() -> ap.Namespace:
     parser.add_argument("-o", "--output")
     parser.add_argument("-p", "--plot")
 
-    if not parser.parse_args().filename.endswith(".vcz"):
+    # Assign parsed arguments to object
+    args = parser.parse_args()
+
+    # Handle bad inputs
+    if not os.path.isdir(os.path.realpath(args.filename)):
+        sys.exit("Input is invalid or does not exist")
+
+    if not os.path.isdir(os.path.dirname(args.output)):
+        sys.exit("Output directory does not exist")
+
+    if not os.path.isdir(os.path.dirname(args.plot)):
+        sys.exit("Plot directory does not exist")
+
+    if not args.filename.endswith(".vcz"):
         sys.exit("Input must be .vcz")
+    
+    if not args.output.endswith(".csv"):
+        sys.exit("Output summary must be .csv")
+    
+    if not args.plot.endswith((".png", ".pdf", ".jpeg", ".jpg", ".svg")):
+        sys.exit("Invalid plot filetype")
+
 
     # Return parsed arguments
-    return parser.parse_args()
+    return args
 
 
 def load_data(args: ap.Namespace) -> list:
@@ -94,7 +116,7 @@ def compute_new_dims(ds: list) -> list:
 
 def make_output(ds: list, args: ap.Namespace):
     """
-    Create and save plot, save statistics as tsv.
+    Create and save plot, save statistics as csv.
 
     :param ds: list of xarray.Datasets with window, FST, and dxy dimensions
     :type ds: list
@@ -119,13 +141,16 @@ def make_output(ds: list, args: ap.Namespace):
         constrained_layout=True,
     )
 
-    # Create list to store statistics in
-    stats = []
+    # Create an array to store statistics in with header
+    stats_out = [["rho", "p", "cohort_comparison", "chromosome"]]
 
     # Loop through subplot rows
     for i in range(ax.shape[0]):
         # Loop through subplot columns
         for j in range(ax.shape[1]):
+            # Assign the two cohorts being compared to `comparison`
+            comparison = f"{cohort_names[x[j, 0]]} vs {cohort_names[x[j, 1]]}"
+            
             # Assign FST values for a give population comparison to array
             fst = ds[i].stat_Fst.values[:, x[j, 0], x[j, 1]]
 
@@ -136,14 +161,22 @@ def make_output(ds: list, args: ap.Namespace):
             corr = sp.spearmanr(fst, dxy)
 
             # Extract rounded values to plot from correlation stats
+            stats_row = []
             corr_round = []
             for stat in corr:
+                # Append stat to row of output file
+                stats_row.append(stat)
+
                 # Use scientific notation if exceedingly small
                 if stat < 0.005:
                     corr_round.append(f"{stat:.0e}")
 
                 else:
                     corr_round.append(f"{stat:.2f}")
+
+            # Append population comparison and chromosome to output row
+            stats_row.extend([comparison, chrom_names[i]])
+            stats_out.append(stats_row)
 
             # Draw a scatter plot
             scatter = ax[i, j].scatter(
@@ -211,7 +244,8 @@ def make_output(ds: list, args: ap.Namespace):
 
     # Save stats
     if args.output:
-        pass
+        with open(args.output, "w") as f:
+            csv.writer(f).writerows(stats_out)
 
     # Save plot
     if args.plot:
@@ -221,7 +255,7 @@ def make_output(ds: list, args: ap.Namespace):
 def main():
     """
     Parse command line arguments, load data into xarray.Datasets, merge new
-    dimensions into xarray.Datasets, create and save plots and outputs in tsv
+    dimensions into xarray.Datasets, create and save plots and outputs in csv
     """
     args = parse_args()
     ds = load_data(args)

@@ -5,6 +5,15 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "CurrentFileIn_Out",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "python": "${command:python.interpreterPath}",
+            "args": "test/ProjTaxaFilt.vcz -o results/stats.csv -p results/plot.pdf" // to prompt user: "${command:pickArgs}"
+        },    
+        {
             "name": "CurrentFileIn",
             "type": "debugpy",
             "request": "launch",
