@@ -99,7 +99,7 @@ def load_data(args: ap.Namespace) -> list:
     return [ds.isel(variants=mask_5), ds.isel(variants=mask_Z)]
 
 
-def compute_new_dims(ds: list) -> list:
+def compute_new_dims(ds: list, window_size: int) -> list:
     """
     Merge windows (10,000 variants), FST and dxy dimensions into each chromosomes dataset
 
@@ -113,10 +113,10 @@ def compute_new_dims(ds: list) -> list:
     # Loop over the index of each dataset by chromosome
     for i in range(len(ds)):
         # Merge windows into dataset
-        ds[i] = sg.window_by_variant(ds[i], size=10_000)
+        ds[i] = sg.window_by_variant(ds[i], size=window_size)
 
-        # Chunk the variants to the window size
-        ds[i] = ds[i].chunk(chunks={"variants": 10_000}) 
+        # Chunk the variants by window size
+        ds[i] = ds[i].chunk(chunks={"variants": window_size}) 
 
         # Merge FST and dxy into dataset (both are computed with the `sg.Fst()` method)
         ds[i] = sg.Fst(ds[i])
@@ -125,7 +125,7 @@ def compute_new_dims(ds: list) -> list:
     return ds
 
 
-def make_output(ds: list, args: ap.Namespace):
+def make_output(ds: list, args: ap.Namespace, window_size: int):
     """
     Create and save plot, save statistics as csv.
 
@@ -166,12 +166,11 @@ def make_output(ds: list, args: ap.Namespace):
             # Assign FST values for a give population comparison to array
             fst = ds[i].stat_Fst.values[:, x[j, 0], x[j, 1]]
 
-            # Assign dxy values for a given population comparison to array
-            dxy = ds[i].stat_divergence.values[:, x[j, 0], x[j, 1]] / 10_000
+            # Assign dxy values for a given population comparison to array (divide by window size to get divergence per variant)
+            dxy = ds[i].stat_divergence.values[:, x[j, 0], x[j, 1]] / window_size
 
             # Assign correlation stats to scipy SignificanceResult
             corr = sp.spearmanr(fst, dxy)
-            print(type(ds[0].stat_divergence.values))
 
             # Extract rounded values to plot from correlation stats
             stats_row = []
@@ -200,8 +199,8 @@ def make_output(ds: list, args: ap.Namespace):
                 c=ds[i].window_start.values / ds[i].window_start.values[-1],
                 cmap="managua",
                 # Point aesthetics
-                s=50,
-                alpha=0.3,
+                s=10,
+                alpha=0.2,
             )
 
             # Place stats in subplots
@@ -250,7 +249,7 @@ def make_output(ds: list, args: ap.Namespace):
         location="right",
         aspect=25,
         pad=0.035,
-        label="Normalized window index\n(Window size: 10,000 variants)",
+        label=f"Normalized window index\n(Window size: {window_size} variants)",
     )
 
     # Save stats
@@ -275,10 +274,12 @@ def main():
     Parse command line arguments, load data into xarray.Datasets, merge new
     dimensions into xarray.Datasets, create and save plots and outputs in csv
     """
+    window_size = 2_000
+
     args = parse_args()
     ds = load_data(args)
-    ds = compute_new_dims(ds)
-    make_output(ds, args)
+    ds = compute_new_dims(ds, window_size)
+    make_output(ds, args, window_size)
 
 
 # Run program
