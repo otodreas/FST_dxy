@@ -1,5 +1,16 @@
 #!/usr/bin/env python
 
+"""
+This script takes a Zarr directory, calculates FST and dxy over windows
+spanning 2000 variants, and generates a summary table using Pearsons
+correlation and a plot.
+
+Arguments are filename (mandatory) and paths to output file and plot.
+xarray.Datasets generated with sgkit are used to store the genetic information
+in memory, and the variant xarray.DataArray is chunked by the window size to
+make computation over windows easy and efficient.
+"""
+
 # Import libraries
 print("2/2: Importing libraries...")
 import sys

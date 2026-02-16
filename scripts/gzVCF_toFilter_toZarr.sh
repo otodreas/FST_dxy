@@ -4,7 +4,9 @@
 This script takes bgzipped VCF files and cleans them up and turns them into
 Zarr directories in whatever directory you are in
 
-The program 
+The program uses hard filters in vcftools as there is no truth set for the
+data, bcftools to index, and vcf2zarr, which is recommended by the maintainers
+of sgkit, which is used in the next script for analysis.
 '
 
 # Assign directory to variable
