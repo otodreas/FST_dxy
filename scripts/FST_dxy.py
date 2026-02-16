@@ -5,6 +5,7 @@ import argparse as ap
 import sgkit as sg
 import xarray as xr
 import numpy as np
+import scipy.stats as sp
 import matplotlib.pyplot as plt
 import matplotlib.transforms as trans
 
@@ -14,11 +15,11 @@ def parse_args() -> ap.Namespace:
     # Define parser
     parser = ap.ArgumentParser(
         prog="FST_dxy",
-        description="""
-            This program takes the ProjTaxa.vcz/ Zarr directory as input,
-            converts it to an xarray.Dataset object, computes pairwise
-            windowed FST and dxy, and generates scatterplots.
-        """,
+        description=(
+            "This program takes the ProjTaxa.vcz/ Zarr directory as input, "
+            + "converts it to an xarray.Dataset object, computes pairwise "
+            + "windowed FST and dxy, and generates scatterplots."
+        ),
         epilog="Author: Oliver Todreas"
     )
 
@@ -77,13 +78,20 @@ def make_plot(ds: list, args: ap.Namespace):
     for i in range(ax.shape[0]):
         # Loop through subplot columns
         for j in range(ax.shape[1]):
+            # Assign FST values for a give population comparison to array
+            fst = ds[i].stat_Fst.values[:, x[j, 0], x[j, 1]]
+
+            # Assign dxy values for a given population comparison to array
+            dxy = ds[i].stat_divergence.values[:, x[j, 0], x[j, 1]]
+
+            # Assign correlation stats to scipy SignificanceResult
+            corr = sp.spearmanr(fst, dxy)
+
             # Draw a scatter plot
             scatter = ax[i, j].scatter(
-                # FST values for a give population comparison
-                ds[i].stat_Fst.values[:, x[j, 0], x[j, 1]],
-
-                # dxy values for a given population comparison
-                ds[i].stat_divergence.values[:, x[j, 0], x[j, 1]],
+                # Plot FST on x and dxy on y
+                fst,
+                dxy,
 
                 # Color scale
                 c=ds[i].window_start.values / ds[-1].window_stop.values[-1] * 100,
@@ -92,6 +100,27 @@ def make_plot(ds: list, args: ap.Namespace):
                 # Point aesthetics
                 s=50,
                 alpha=1/3
+            )
+
+            # Place stats in subplots
+            ax[i, j].text(
+                # Top right
+                x=0.95,
+                y=0.95,
+
+                # Latex-style and f-string style formatting
+                s=(
+                    fr"$\rho = {corr.statistic:.2f}$"
+                    + "\n"
+                    + fr"$p = {corr.pvalue:.3f}$"
+                ),
+
+                # Assign coordinates to the axes-relative space rather than real x-y values
+                transform=ax[i, j].transAxes,
+
+                # Align right and top
+                ha='right',
+                va='top'
             )
 
             # Set population comparison labels on top plots
@@ -135,10 +164,7 @@ def make_plot(ds: list, args: ap.Namespace):
 
     # Save plot
     if args.output:
-        plt.savefig(args.output, bbox_inches=trans.Bbox([[0, 0], [0, 0.5]]))
-
-# pearson: normal/dont violate assmpt
-# spearman: ranked (non-parametric: dont follow assumptions)
+        plt.savefig(args.output)#, bbox_inches=trans.Bbox([[0, 0], [0, 0.5]]))
 
 def main():
     args = parse_args()
