@@ -239,10 +239,10 @@ def make_output(ds: list, args: ap.Namespace, window_size: int):
 
             # Set x label on bottom plots
             else:
-                ax[i, j].set_xlabel(r"F_{ST}")
+                ax[i, j].set_xlabel(r"$F_{ST}$")
 
         # Set y label on left plots
-        ax[i, 0].set_ylabel(r"d_{xy}")
+        ax[i, 0].set_ylabel(r"$d_{XY}$")
 
         # Assign twin axis to `r_lab` and remove ticks
         r_lab = ax[i, -1].twinx()
