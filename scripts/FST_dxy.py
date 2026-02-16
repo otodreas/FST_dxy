@@ -87,6 +87,16 @@ def make_plot(ds: list, args: ap.Namespace):
             # Assign correlation stats to scipy SignificanceResult
             corr = sp.spearmanr(fst, dxy)
 
+            # Extract rounded values to plot from correlation stats
+            corr_round = []
+            for stat in corr:
+                # Use scientific notation if exceedingly small
+                if stat < 0.005:
+                    corr_round.append(f"{stat:.0e}")
+
+                else:
+                    corr_round.append(f"{stat:.2f}")
+
             # Draw a scatter plot
             scatter = ax[i, j].scatter(
                 # Plot FST on x and dxy on y
@@ -110,9 +120,9 @@ def make_plot(ds: list, args: ap.Namespace):
 
                 # Latex-style and f-string style formatting
                 s=(
-                    fr"$\rho = {corr.statistic:.2f}$"
+                    fr"$\rho = {corr_round[0]}$"
                     + "\n"
-                    + fr"$p = {corr.pvalue:.3f}$"
+                    + fr"$p = {corr_round[1]}$"
                 ),
 
                 # Assign coordinates to the axes-relative space rather than real x-y values
@@ -159,7 +169,7 @@ def make_plot(ds: list, args: ap.Namespace):
         location="right",
         aspect=25, 
         pad=0.09,
-        label='Window Start (% Chromosome Length)'
+        label='Ordered windows (% Chromosome Length)'
     )
 
     # Save plot
