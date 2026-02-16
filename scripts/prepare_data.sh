@@ -12,27 +12,20 @@ CWD="$(pwd)"
 VCF_Z="$CWD/ProjTaxa.vcf.gz"
 VCF_Z_F="$CWD/ProjTaxaFilt.vcf.gz"
 
-
-# TODO: understand what each step is doing. why is missingness going up in .lmiss and .imiss files, etc
-
 # Filter data with vcftools
   # Remove outgroup (Naxos2)
   # Keep biallelic SNPs only
-  # Filter by quality by genotypes (GQ>30)
-  # Filter by sample depth by genotypes (2.5<DP<70)
-  # Filter by minor allele by sites (minor allele count>=2)
-  # Filter by mean depth by sites (5<meanDP<50)
-  # Filter by missingness by sites (exclude missing>3 samples)
+  # Filter by quality by genotypes (GQ>20)
+  # Filter by sample depth by genotypes (5<DP<70)
+  # Filter by missingness by sites (missingness<=10%)
   # Recode output to VCF with all metadata
   # Pipe output into bcftools to encode in a bgzipped file
 vcftools --gzvcf "$VCF_Z" \
   --remove-indv Naxos2 \
   --remove-indels --min-alleles 2 --max-alleles 2 \
   --minGQ 20 \
-  --minDP 2.5 --maxDP 70 \
-  --mac 2 \
-  --min-meanDP 5 --max-meanDP 50 \
-  --max-missing-count 3 \
+  --minDP 5 --maxDP 70 \
+  --max-missing 0.9 \
   --recode --recode-INFO-all \
   --stdout | \
   bcftools view -O z -o "$VCF_Z_F"
