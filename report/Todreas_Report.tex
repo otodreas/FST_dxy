@@ -16,9 +16,11 @@ To examine the relationship between genetic differentiation and divergence for c
 
 \section{Methods}
 
-We were supplied with a dataset in the form of a Variant Calling Format (VCF) file. A filtering step was applied using hard filters in VCFtools at both the genotype and variant level in lieu of a truth set. Only biallelic SNPs passed the filter. Any genotypes with Phred scores below 20 was set to missing, as well as any genotypes with sequencing depths outside the range of 5–70. Then, sites with missingness of 10\% or more were excluded.
+A shell script was used to filter, index, and convert a VCF file. The filtering step was applied using hard filters in VCFtools at both the genotype and variant level in lieu of a truth set. Only biallelic SNPs passed the filter. Any genotypes with Phred scores below 20 was set to missing, as well as any genotypes with sequencing depths outside the range of 5–70. Then, sites with missingness of 10\% or more were excluded. After filtering, data were indexed using BCFTools. Once indexed, they were converted first to an Intermediate Columnar Format (ICF) directory, then to a Zarr directory using vcf2zarr. Since the following step was to analyze the data using sgkit, vcf2zarr was used because of its status as the recommended package for preparing VCF data for import using sgkit.
 
-\section{Conclusions}
+A Python script was used to read the Zarr data into memory, compute $F_{ST}$ and $d_{XY}$, calculate correlation between the two metrics, and plot the results. The filtered Zarr directory was assigned to an Xarray Dataset object using sgkit. A new dimension was merged into the dataset as samples were divided into cohorts based on their populations. The dataset was then divided into two Xarray Datasets, one for each chromosome in the VCF. Windows of 2,000 variants were then merged into the dataset, and the variant dimension, an Xarray DataSet, was chunked to match the size of the windows, at 2,000 variants per chunk, allowing pairwise $F_{ST}$ and $d_{XY}$ to be calculated and stored in similarity matrices, one for each window of variants using sgkit. Finally, Pearson's correlation coefficient was calculated on groups of pairwise $F_{ST}$ and $d_{XY}$ sets for each chromosome using scipy, and data were plotted using matplotlib.
+
+\section{Results \& Conclusions}
 
 \begin{thebibliography}{99}
 
