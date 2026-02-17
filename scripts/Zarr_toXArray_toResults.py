@@ -2,7 +2,7 @@
 
 """
 This script takes a Zarr directory, calculates FST and dxy over windows
-spanning 2000 variants, and generates a summary table using Pearsons
+spanning 1250 variants, and generates a summary table using Pearsons
 correlation and a plot.
 
 Arguments are filename (mandatory) and paths to output file and plot.
