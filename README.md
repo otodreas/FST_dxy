@@ -24,7 +24,7 @@ where `data/` and `results/` are empty directories that you will populate.
 
 The scripts in `scripts/` are intended to be run sequentially, which is outlined in **Reproducible workflow: Run analyses**.
 
-This project is available on (GitHub)[https://github.com/otodreas/FST_dxy/tree/main]. The GitHub repo also has docs, test data and test results.
+This project is available on [GitHub](https://github.com/otodreas/FST_dxy/tree/main). The GitHub repo also has docs (including written report), test data and test results.
 
 ## Reproducible workflow
 
