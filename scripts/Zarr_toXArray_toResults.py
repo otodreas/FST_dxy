@@ -151,8 +151,8 @@ def make_output(ds: list, args: ap.Namespace, window_size: int):
     cohort_names = ("8N", "K", "Lesina")
     chrom_names = ("Chromosome 5", "Chromosome Z")
 
-    # Create key for indices of statistics by population comparison
-    x = np.array([(0, 1), (0, 2), (1, 2)])
+    # Create key for indices of statistics by population comparison (top corner of similarity matrix)
+    tri_up = np.array([(0, 1), (0, 2), (1, 2)])
 
     # Create subplots
     fig, ax = plt.subplots(
@@ -172,13 +172,13 @@ def make_output(ds: list, args: ap.Namespace, window_size: int):
         # Loop through subplot columns
         for j in range(ax.shape[1]):
             # Assign the two cohorts being compared to `comparison`
-            comparison = f"{cohort_names[x[j, 0]]} vs {cohort_names[x[j, 1]]}"
+            comparison = f"{cohort_names[tri_up[j, 0]]} vs {cohort_names[tri_up[j, 1]]}"
 
             # Assign FST values for a give population comparison to array
-            fst = ds[i].stat_Fst.values[:, x[j, 0], x[j, 1]]
+            fst = ds[i].stat_Fst.values[:, tri_up[j, 0], tri_up[j, 1]]
 
             # Assign dxy values for a given population comparison to array (divide by window size to get divergence per variant)
-            dxy = ds[i].stat_divergence.values[:, x[j, 0], x[j, 1]] / window_size
+            dxy = ds[i].stat_divergence.values[:, tri_up[j, 0], tri_up[j, 1]] / window_size
 
             # Assign correlation stats to scipy SignificanceResult
             corr = sp.spearmanr(fst, dxy)
