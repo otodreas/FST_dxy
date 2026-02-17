@@ -8,13 +8,10 @@ The directory structure of this reproducible workflow is as follows
 ```
 FST_dxy_analysis/
 ├── data/
-│   └── .gitkeep
 ├── scripts/
 │   ├── gzVCF_toFilter_toZarr.sh
 │   └── Zarr_toXArray_toResults.py
 ├── results/
-│   └── .gitkeep
-├── .gitignore
 ├── environment.yaml
 ├── LICENSE
 └── README.md
