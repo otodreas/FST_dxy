@@ -47,9 +47,10 @@ def parse_args() -> ap.Namespace:
 
     # Add arguments
     parser.add_argument("filename")
-    parser.add_argument("-o", "--output", help="Name of csv with correlation statistics")
+    parser.add_argument(
+        "-o", "--output", help="Name of csv with correlation statistics"
+    )
     parser.add_argument("-p", "--plot", help="Name of plot to be saved")
-    # TODO: window size arg or var
 
     # Assign parsed arguments to object
     args = parser.parse_args()
@@ -64,7 +65,7 @@ def parse_args() -> ap.Namespace:
     if args.output:
         if not os.path.isdir(os.path.dirname(args.output)):
             sys.exit("Output directory does not exist")
-        
+
         if not args.output.endswith((".csv", "csv/")):
             sys.exit("Output summary must be .csv")
 
@@ -127,7 +128,7 @@ def compute_new_dims(ds: list, window_size: int) -> list:
         ds[i] = sg.window_by_variant(ds[i], size=window_size)
 
         # Chunk the variants by window size
-        ds[i] = ds[i].chunk(chunks={"variants": window_size}) 
+        ds[i] = ds[i].chunk(chunks={"variants": window_size})
 
         # Merge FST and dxy into dataset (both are computed with the `sg.Fst()` method)
         ds[i] = sg.Fst(ds[i])
@@ -162,7 +163,7 @@ def make_output(ds: list, args: ap.Namespace, window_size: int):
         sharey=True,
         constrained_layout=True,
         dpi=300,
-        figsize=(6, 3.5)
+        figsize=(6, 3.5),
     )
 
     # Create an array to store statistics in with header
@@ -179,7 +180,10 @@ def make_output(ds: list, args: ap.Namespace, window_size: int):
             fst = ds[i].stat_Fst.values[:, tri_up[j, 0], tri_up[j, 1]]
 
             # Assign dxy values for a given population comparison to array (divide by window size to get divergence per variant)
-            dxy = ds[i].stat_divergence.values[:, tri_up[j, 0], tri_up[j, 1]] / window_size
+            dxy = (
+                ds[i].stat_divergence.values[:, tri_up[j, 0], tri_up[j, 1]]
+                / window_size
+            )
 
             # Assign correlation stats to scipy SignificanceResult
             corr = sp.spearmanr(fst, dxy)
@@ -269,7 +273,7 @@ def make_output(ds: list, args: ap.Namespace, window_size: int):
         with open(args.output, "w") as f:
             csv.writer(f).writerows(stats_out)
             print(f"FST-dxy Pearson correlations written to {args.output}")
-    
+
     else:
         print("FST-dxy Pearson correclations by group:")
         for row in stats_out:
@@ -277,7 +281,9 @@ def make_output(ds: list, args: ap.Namespace, window_size: int):
 
     # Save plot
     if args.plot:
-        plt.savefig(args.plot, )
+        plt.savefig(
+            args.plot,
+        )
         print(f"FST-dxy plot written to {args.plot}")
 
 
