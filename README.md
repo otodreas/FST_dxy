@@ -6,7 +6,7 @@ Project for BINP28 comparing FST and dxy across the genome.
 The directory structure of this reproducible workflow is as follows
 
 ```
-.
+FST_dxy_analysis/
 ├── data/
 │   └── .gitkeep
 ├── scripts/
@@ -30,11 +30,13 @@ This project is available on [GitHub](https://github.com/otodreas/FST_dxy/tree/m
 
 Below are comprehensive steps to run the workflow. If you prefer, scroll to the bottom to find the entire, uninterrupted list of commands.
 
-`cd` into the root directory for the entirety of this workflow.
+`cd` into the root directory for the **entirety of this workflow**.
 
 ```sh
 cd ~/FST_dxy_analysis/
 ```
+
+Note that it can take some time to build the environment and run the scripts.
 
 ### Import data
 
@@ -46,8 +48,10 @@ Build the conda environment from the project root and activate it:
 
 ```sh
 conda env create -f environment.yml
-conda activate FST_dxy
+conda activate Todreas_FST_dxy
 ```
+
+The conda environment contains VCFTools, BCFTools, bio2zarr, pytz, Python, sgkit, matplotlib, and all dependencies (including Xarray, numpy, and SciPy).
 
 ### Change permissions
 
@@ -61,7 +65,7 @@ chmod +x scripts/*
 
 ### Run analyses
 
-Both scripts need to be run on their own, since `sgkit` (Statistical Genetics Toolkit) relies on `Zarr` directories, which would be difficult to write to `stdout`.
+Both scripts need to be run on their own, since `sgkit` (Statistical Genetics Toolkit) relies on `Zarr` directories, which cant be written to `stdout`.
 
 Run analyses:
 

@@ -160,8 +160,9 @@ def make_output(ds: list, args: ap.Namespace, window_size: int):
         ncols=3,
         sharex=True,
         sharey=True,
-        figsize=(6, 3.5),
         constrained_layout=True,
+        dpi=300,
+        figsize=(6, 3.5)
     )
 
     # Create an array to store statistics in with header
@@ -276,7 +277,7 @@ def make_output(ds: list, args: ap.Namespace, window_size: int):
 
     # Save plot
     if args.plot:
-        plt.savefig(args.plot)
+        plt.savefig(args.plot, )
         print(f"FST-dxy plot written to {args.plot}")
 
 
