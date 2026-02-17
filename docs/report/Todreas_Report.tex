@@ -1,6 +1,7 @@
 \documentclass{article}
 
 \usepackage{url}
+\usepackage{graphicx}
 
 \begin{document}
 
@@ -16,37 +17,176 @@ To examine the relationship between genetic differentiation and divergence for c
 
 \section{Methods}
 
-A shell script was used to filter, index, and convert a VCF file. The filtering step was applied using hard filters in VCFtools at both the genotype and variant level in lieu of a truth set. Only biallelic SNPs passed the filter. Any genotypes with Phred scores below 20 was set to missing, as well as any genotypes with sequencing depths outside the range of 5–70. Then, sites with missingness of 10\% or more were excluded. After filtering, data were indexed using BCFTools. Once indexed, they were converted first to an Intermediate Columnar Format (ICF) directory, then to a Zarr directory using vcf2zarr.
+A shell script was used to filter, index, and convert a VCF file. The filtering step was applied using hard filters in VCFtools at both the genotype and variant level in lieu of a truth set [1]. Only biallelic SNPs passed the filter. Any genotypes with Phred scores below 20 was set to missing, as well as any genotypes with sequencing depths outside the range of 5–70. Then, sites with missingness of 10\% or more were excluded. After filtering, data were indexed using BCFTools [2]. Once indexed, they were converted first to an Intermediate Columnar Format (ICF) directory, then to a Zarr directory using vcf2zarr [3].
 
-A Python script was used to read the Zarr data into memory, compute $F_{ST}$ and $d_{XY}$, calculate correlation between the two metrics, and plot the results. The filtered Zarr directory was assigned to an Xarray Dataset object using sgkit. A new dimension was merged into the dataset as samples were divided into cohorts based on their populations. The dataset was then divided into two Xarray Datasets, one for each chromosome in the VCF. Windows of 300 variants were then merged into the dataset, and the variant dimension, an Xarray DataSet, was chunked to match the size of the windows, at 1,250 variants per chunk, allowing pairwise $F_{ST}$ and $d_{XY}$ to be calculated and stored in similarity matrices, one for each window of variants using sgkit. Finally, Pearson correlation coefficients were calculated on groups of pairwise $F_{ST}$ and $d_{XY}$ sets for each chromosome using scipy, and data were plotted using matplotlib.
+A Python script was used to read the Zarr data into memory, compute $F_{ST}$ and $d_{XY}$, calculate correlation between the two metrics, and plot the results. The filtered Zarr directory was assigned to an Xarray Dataset object using sgkit [4, 5]. A new dimension was merged into the dataset as samples were divided into cohorts based on their populations. The dataset was then divided into two Xarray Datasets, one for each chromosome in the VCF. Windows of 300 variants were then merged into the dataset, and the variant dimension, an Xarray DataSet, was chunked to match the size of the windows, at 1,250 variants per chunk, allowing pairwise $F_{ST}$ and $d_{XY}$ to be calculated and stored in similarity matrices, one for each window of variants using sgkit. Finally, Pearson correlation coefficients were calculated on groups of pairwise $F_{ST}$ and $d_{XY}$ sets for each chromosome using SciPy, and data were plotted using matplotlib[6, 7].
 
 \section{Results \& Conclusions}
 
-Filtering cutoffs were motivated by close examination of the data as well as the method outlined by Dennis et al., who motivated the decision to include only biallelic SNPs (TODO: cite). sgkit was used to generate $F_{ST}$ and $d_{XY}$ because of its flexibility with assigning cohorts and windows, integration of Xarray's strengths like chunking, and because it is the successor to scikit-allel, a popular toolkit that is now only being maintained. Windowing by variant was chosen for its reliability in the number of sites per window, guaranteeing 300 VCF rows of data for each window on which $F_{ST}$ and $d_{XY}$ were computed, except for the final window of each chromosome. A window size of 1,250 variants was chosen because base pairs outnumbered sites in the original data by roughly 40:1, meaning that roughly the same number of windows would be obtained using 1,250-variant windows as there would be 50kb-position windows. Pearson correlation coefficients were used to assess correlation because upon scrutinizing the $F_{ST}-d_{XY}$ plots, many groups appeared right-skewed along $F_{ST}$.
+Filtering cutoffs were motivated by close examination of the data as well as the method outlined by Dennis et al., who motivated the decision to include only biallelic SNPs [8]. sgkit was used to generate $F_{ST}$ and $d_{XY}$ because of its flexibility with assigning cohorts and windows, integration of Xarray's strengths like chunking, and because it is the successor to scikit-allel, a popular toolkit that is now only being maintained. Windowing by variant was chosen for its reliability in the number of sites per window, guaranteeing 300 VCF rows of data for each window on which $F_{ST}$ and $d_{XY}$ were computed, except for the final window of each chromosome. A window size of 1,250 variants was chosen because base pairs outnumbered sites in the original data by roughly 40:1, meaning that roughly the same number of windows would be obtained using 1,250-variant windows as there would be 50kb-position windows. Pearson correlation coefficients were used to assess correlation because upon scrutinizing the $F_{ST}-d_{XY}$ plots, many groups appeared right-skewed along $F_{ST}$.
 
 There was more meaningful correlation between $F_{ST}$ and $d_{XY}$ for some populations compared to others (Figure 1). For instance, differentiation and divergence appeared highly correlated between both Lesina and 8N and Lesina and K cohorts on chromosome Z, with $\rho = 0.94$ and $\rho = 0.92$ respectively ($p = 3 \times 10^{-91}$, $p=1\times10^{-80}$). Pearson correlation coefficients were estimated with high certainty for all cohort comparisons and chromosomes ($p<0.05)$, but for the remainder of the cohort pairs, correlation was less clear.
 
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/myfigure.pdf}
+    \caption{Your caption here.}
+    \label{fig:myfigure}
+\end{figure}
+
 The biological interpretation of these results is that sites on Lesina cohort's Z chromosome that have a high proportion of differing bases compared to the other cohorts also maintain that difference even when diversity within their cohort is taken into consideration, and the same agreement is observed in the lower $F_{ST}$ and $d_{XY}$ values.
+
 
 \begin{thebibliography}{99}
 
-Dennis TPW, Sulieman JE, Abdin M, Ashine T, Asmamaw Y, Eyasu A, Simma EA, Zemene E, Negash N, Kochora A, Assefa M, Elzack HS, Dagne A, Lukas B, Bulto MG, Enayati A, Nikpoor F, Al-Nazawi AM, Al-Zahrani MH, Khaireh BA, Kayed S, Abdi AA, Allan R, Ashraf F, Pignatelli P, Morris M, Nagi SC, Lucas ER, Hernandez-Koutoucheva A, Doumbe-Belisse P, Epstein A, Brown R, Wilson AL, Reynolds AM, Sherrard-Smith E, Yewhalaw D, Gadisa E, Malik E, Kafy HT, Donnelly MJ, Weetman D. The origin, invasion history and resistance architecture of Anopheles stephensi in Africa. bioRxiv [Preprint]. 2025 Mar 26:2025.03.24.644828. doi: 10.1101/2025.03.24.644828. PMID: 40196515; PMCID: PMC11974716.
+\bibitem{danecek2011vcftools}
+Danecek, P., Auton, A., Abecasis, G., Albers, C.~A., Banks, E., DePristo, M.~A., Handsaker, R.~E., Lunter, G., Marth, G.~T., Sherry, S.~T., McVean, G., Durbin, R., and 1000 Genomes Project Analysis Group.
+The variant call format and VCFtools.
+\textit{Bioinformatics}, 27(15):2156--2158, 2011.
+\url{https://doi.org/10.1093/bioinformatics/btr330}
+
+\bibitem{danecek2021samtools}
+Danecek, P., Bonfield, J.~K., Liddle, J., Marshall, J., Ohan, V., Pollard, M.~O., Whitwham, A., Keane, T., McCarthy, S.~A., Davies, R.~M., and Li, H.
+Twelve years of SAMtools and BCFtools.
+\textit{GigaScience}, 10(2):giab008, 2021.
+\url{https://doi.org/10.1093/gigascience/giab008}
+
+\bibitem{czech2025vcfzarr}
+Czech, E., Millar, T.~R., Tyler, W., White, T., Elsworth, B., Guez, J., Hancox, J., Jeffery, B., Karczewski, K.~J., Miles, A., Tallman, S., Unneberg, P., Wojdyla, R., Zabad, S., Hammerbacher, J., and Kelleher, J.
+Analysis-ready VCF at biobank scale using Zarr.
+\textit{bioRxiv} [Preprint], 2025.
+\url{https://doi.org/10.1101/2024.06.11.598241}
 
 \bibitem{sgkit2021}
-sgkit Development Team (2021).
-\textit{sgkit: Scalable genomics toolkit}.
+sgkit Development Team.
+\textit{sgkit: Scalable genomics toolkit}, 2021.
 \url{https://github.com/sgkit-dev/sgkit}
 
 \bibitem{hoyer2017xarray}
-Hoyer, S., \& Hamman, J. (2017).
-xarray: ND labeled arrays and datasets in Python.
-\textit{Journal of Open Research Software}, 5(1), 10.
+Hoyer, S. and Hamman, J.
+xarray: N-D labeled arrays and datasets in Python.
+\textit{Journal of Open Research Software}, 5(1), 2017.
+\url{https://doi.org/10.5334/jors.148}
 
-\bibitem{danecek2021bcftools}
-Danecek, P., et al. (2021).
-Twelve years of SAMtools and BCFtools.
-\textit{GigaScience}, 10(2), giab008.
+\bibitem{virtanen2020scipy}
+Virtanen, P., Gommers, R., Oliphant, T.~E., et al.
+{SciPy} 1.0: fundamental algorithms for scientific computing in Python.
+\textit{Nature Methods}, 17:261--272, 2020.
+\url{https://doi.org/10.1038/s41592-019-0686-2}
+
+\bibitem{hunter2007matplotlib}
+Hunter, J.~D.
+Matplotlib: A 2D graphics environment.
+\textit{Computing in Science \& Engineering}, 9(3):90--95, 2007.
+\url{https://doi.org/10.1109/MCSE.2007.55}
+
+\bibitem{dennis2025stephensi}
+Dennis, T.~P.~W., Sulieman, J.~E., Abdin, M., Ashine, T., Asmamaw, Y., Eyasu, A., Simma, E.~A., Zemene, E., Negash, N., Kochora, A., Assefa, M., Elzack, H.~S., Dagne, A., Lukas, B., Bulto, M.~G., Enayati, A., Nikpoor, F., Al-Nazawi, A.~M., Al-Zahrani, M.~H., Khaireh, B.~A., Kayed, S., Abdi, A.~A., Allan, R., Ashraf, F., Pignatelli, P., Morris, M., Nagi, S.~C., Lucas, E.~R., Hernandez-Koutoucheva, A., Doumbe-Belisse, P., Epstein, A., Brown, R., Wilson, A.~L., Reynolds, A.~M., Sherrard-Smith, E., Yewhalaw, D., Gadisa, E., Malik, E., Kafy, H.~T., Donnelly, M.~J., and Weetman, D.
+The origin, invasion history and resistance architecture of \textit{Anopheles stephensi} in Africa.
+\textit{bioRxiv} [Preprint], 2025.
+\url{https://doi.org/10.1101/2025.03.24.644828}
 
 \end{thebibliography}
 
+
 \end{document}
+
+% \begin{thebibliography}{99}
+
+% @article{10.1093/bioinformatics/btr330,
+%     author = {Danecek, Petr and Auton, Adam and Abecasis, Goncalo and Albers, Cornelis A. and Banks, Eric and DePristo, Mark A. and Handsaker, Robert E. and Lunter, Gerton and Marth, Gabor T. and Sherry, Stephen T. and McVean, Gilean and Durbin, Richard and 1000 Genomes Project Analysis Group},
+%     title = {The variant call format and VCFtools},
+%     journal = {Bioinformatics},
+%     volume = {27},
+%     number = {15},
+%     pages = {2156-2158},
+%     year = {2011},
+%     month = {06},
+%     abstract = {Summary: The variant call format (VCF) is a generic format for storing DNA polymorphism data such as SNPs, insertions, deletions and structural variants, together with rich annotations. VCF is usually stored in a compressed manner and can be indexed for fast data retrieval of variants from a range of positions on the reference genome. The format was developed for the 1000 Genomes Project, and has also been adopted by other projects such as UK10K, dbSNP and the NHLBI Exome Project. VCFtools is a software suite that implements various utilities for processing VCF files, including validation, merging, comparing and also provides a general Perl API.Availability:  http://vcftools.sourceforge.netContact:  rd@sanger.ac.uk},
+%     issn = {1367-4803},
+%     doi = {10.1093/bioinformatics/btr330},
+%     url = {https://doi.org/10.1093/bioinformatics/btr330},
+%     eprint = {https://academic.oup.com/bioinformatics/article-pdf/27/15/2156/48863483/bioinformatics_27_15_2156.pdf},
+% }
+
+% @article{10.1093/gigascience/giab008,
+%     author = {Danecek, Petr and Bonfield, James K and Liddle, Jennifer and Marshall, John and Ohan, Valeriu and Pollard, Martin O and Whitwham, Andrew and Keane, Thomas and McCarthy, Shane A and Davies, Robert M and Li, Heng},
+%     title = {Twelve years of SAMtools and BCFtools},
+%     journal = {GigaScience},
+%     volume = {10},
+%     number = {2},
+%     pages = {giab008},
+%     year = {2021},
+%     month = {02},
+%     abstract = {SAMtools and BCFtools are widely used programs for processing and analysing high-throughput sequencing data. They include tools for file format conversion and manipulation, sorting, querying, statistics, variant calling, and effect analysis amongst other methods.The first version appeared online 12 years ago and has been maintained and further developed ever since, with many new features and improvements added over the years. The SAMtools and BCFtools packages represent a unique collection of tools that have been used in numerous other software projects and countless genomic pipelines.Both SAMtools and BCFtools are freely available on GitHub under the permissive MIT licence, free for both non-commercial and commercial use. Both packages have been installed \&gt;1 million times via Bioconda. The source code and documentation are available from https://www.htslib.org.},
+%     issn = {2047-217X},
+%     doi = {10.1093/gigascience/giab008},
+%     url = {https://doi.org/10.1093/gigascience/giab008},
+%     eprint = {https://academic.oup.com/gigascience/article-pdf/10/2/giab008/60687743/giab008.pdf},
+% }
+
+% @article {Czech2024.06.11.598241,
+% 	author = {Czech, Eric and Millar, Timothy R. and Tyler, Will and White, Tom and Elsworth, Benjamin and Guez, J{\'e}r{\'e}my and Hancox, Jonny and Jeffery, Ben and Karczewski, Konrad J. and Miles, Alistair and Tallman, Sam and Unneberg, Per and Wojdyla, Rafal and Zabad, Shadi and Hammerbacher, Jeff and Kelleher, Jerome},
+% 	title = {Analysis-ready VCF at Biobank scale using Zarr},
+% 	elocation-id = {2024.06.11.598241},
+% 	year = {2025},
+% 	doi = {10.1101/2024.06.11.598241},
+% 	publisher = {Cold Spring Harbor Laboratory},
+% 	abstract = {Background Variant Call Format (VCF) is the standard file format for interchanging genetic variation data and associated quality control metrics. The usual row-wise encoding of the VCF data model (either as text or packed binary) emphasises efficient retrieval of all data for a given variant, but accessing data on a field or sample basis is inefficient. Biobank scale datasets currently available consist of hundreds of thousands of whole genomes and hundreds of terabytes of compressed VCF. Row-wise data storage is fundamentally unsuitable and a more scalable approach is needed.Results Zarr is a format for storing multi-dimensional data that is widely used across the sciences, and is ideally suited to massively parallel processing. We present the VCF Zarr specification, an encoding of the VCF data model using Zarr, along with fundamental software infrastructure for efficient and reliable conversion at scale. We show how this format is far more efficient than standard VCF based approaches, and competitive with specialised methods for storing genotype data in terms of compression ratios and single-threaded calculation performance. We present case studies on subsets of three large human datasets (Genomics England: n=78,195; Our Future Health: n=651,050; All of Us: n=245,394) along with whole genome datasets for Norway Spruce (n=1,063) and SARS-CoV-2 (n=4,484,157). We demonstrate the potential for VCF Zarr to enable a new generation of high-performance and cost-effective applications via illustrative examples using cloud computing and GPUs.Conclusions Large row-encoded VCF files are a major bottleneck for current research, and storing and processing these files incurs a substantial cost. The VCF Zarr specification, building on widely-used, open-source technologies has the potential to greatly reduce these costs, and may enable a diverse ecosystem of next-generation tools for analysing genetic variation data directly from cloud-based object stores, while maintaining compatibility with existing file-oriented workflows.Key PointsVCF is widely supported, and the underlying data model entrenched in bioinformatics pipelines.The standard row-wise encoding as text (or binary) is inherently inefficient for large-scale data processing.The Zarr format provides an efficient solution, by encoding fields in the VCF separately in chunk-compressed binary format.Competing Interest StatementJerome Kelleher and Ben Jeffery are paid consultants for Genomics England Limited.ICFIntermediate Columnar FormatGWASGenome Wide Association StudyPBWTPositional Burrows-Wheeler TransformQCQuality ControlUKBUK BiobankVCFVariant Call FormatWGSWhole Genome Sequence},
+% 	URL = {https://www.biorxiv.org/content/early/2025/02/06/2024.06.11.598241},
+% 	eprint = {https://www.biorxiv.org/content/early/2025/02/06/2024.06.11.598241.full.pdf},
+% 	journal = {bioRxiv}
+% }
+
+% \bibitem{sgkit2021}
+% sgkit Development Team (2021).
+% \textit{sgkit: Scalable genomics toolkit}.
+% \url{https://github.com/sgkit-dev/sgkit}
+
+% @article{hoyer2017xarray,
+%   author    = {Hoyer, S. and Hamman, J.},
+%   title     = {xarray: {N-D} labeled arrays and datasets in {Python}},
+%   journal   = {Journal of Open Research Software},
+%   volume    = {5},
+%   number    = {1},
+%   year      = {2017},
+%   publisher = {Ubiquity Press},
+%   doi       = {10.5334/jors.148},
+%   url       = {http://doi.org/10.5334/jors.148}
+% }
+
+% @article{virtanen2020scipy,
+%   author  = {Virtanen, Pauli and Gommers, Ralf and Oliphant, Travis E. and others},
+%   title   = {{SciPy} 1.0: fundamental algorithms for scientific computing in {Python}},
+%   journal = {Nature Methods},
+%   volume  = {17},
+%   pages   = {261--272},
+%   year    = {2020},
+%   doi     = {10.1038/s41592-019-0686-2},
+%   url     = {https://doi.org/10.1038/s41592-019-0686-2}
+% }
+
+% @article{dennis2025stephensi,
+%   author  = {Dennis, T. P. W. and Sulieman, J. E. and Abdin, M. and Ashine, T. and
+%              Asmamaw, Y. and Eyasu, A. and Simma, E. A. and Zemene, E. and Negash, N. and
+%              Kochora, A. and Assefa, M. and Elzack, H. S. and Dagne, A. and Lukas, B. and
+%              Bulto, M. G. and Enayati, A. and Nikpoor, F. and Al-Nazawi, A. M. and
+%              Al-Zahrani, M. H. and Khaireh, B. A. and Kayed, S. and Abdi, A. A. and
+%              Allan, R. and Ashraf, F. and Pignatelli, P. and Morris, M. and Nagi, S. C. and
+%              Lucas, E. R. and Hernandez-Koutoucheva, A. and Doumbe-Belisse, P. and
+%              Epstein, A. and Brown, R. and Wilson, A. L. and Reynolds, A. M. and
+%              Sherrard-Smith, E. and Yewhalaw, D. and Gadisa, E. and Malik, E. and
+%              Kafy, H. T. and Donnelly, M. J. and Weetman, D.},
+%   title   = {The origin, invasion history and resistance architecture of
+%              \textit{Anopheles stephensi} in {Africa}},
+%   journal = {bioRxiv},
+%   year    = {2025},
+%   month   = mar,
+%   note    = {Preprint. doi: 10.1101/2025.03.24.644828. PMID: 40196515; PMCID: PMC11974716},
+%   doi     = {10.1101/2025.03.24.644828},
+%   url     = {https://doi.org/10.1101/2025.03.24.644828}
+% }
+
+% \end{thebibliography}
+
+% \end{document}
