@@ -2,6 +2,19 @@
 
 Project for BINP28 at Lund University's masters in bioinformatics that compares FST and dxy across the genome.
 
+## Requirements
+
+With a Linux 64-bit platform, you can build my conda environment form `./environment.yml`, which is explained below.
+
+If your system does not match or the environment build doesn't work, you can build the conda environment manually and install
+
+- `vcftools=0.1`
+- `bcftools=1.23`
+- `bio2zarr=0.1`
+- `python=3.12`
+- `sgkit=0.10`
+- `matplotlib=3.10`
+
 ## Directory structure
 
 The directory structure of this reproducible workflow is as follows
