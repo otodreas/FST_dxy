@@ -8,17 +8,7 @@ The directory structure of this reproducible workflow is as follows
 
 ```
 FST_dxy/
-├── docs/
-│   ├── notebooks/
-│   │   ├── examine_vcf.ipynb
-│   │   └── test_sgkit.ipynb
-│   ├── Notes.md
-│   ├── report/
-│   │   ├── README.md
-│   │   ├── Todreas_Project_Presentation.pdf
-│   │   ├── Todreas_Project_Report.pdf
-│   │   └── Todreas_Report.tex
-│   └── Todreas_Submission.zip
+├── docs/ # archived scripts, submitted files
 ├── environment.yml
 ├── LICENSE
 ├── README.md

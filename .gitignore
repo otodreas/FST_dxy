@@ -208,6 +208,7 @@ __marimo__/
 
 # Project data
 data/*
+!/data/README.md
 test/*
 !/test/*.sh
 !/test/ProjTaxaSmall.vcf.gz
