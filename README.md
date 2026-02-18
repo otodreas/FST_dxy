@@ -1,6 +1,6 @@
 # FST_dxy
 
-Project for BINP28 at Lund University's masters in bioinformatics that compares FST and dxy across the genome.
+Project for BINP28 at Lund University's masters in bioinformatics that assesses correlation of FST and dxy across sparrow genomes.
 
 
 
