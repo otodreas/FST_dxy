@@ -6,22 +6,40 @@ Project for BINP28 comparing FST and dxy across the genome.
 The directory structure of this reproducible workflow is as follows
 
 ```
-FST_dxy_analysis/
-├── data/
+./
+├── docs/
+│   ├── notebooks/
+│   │   ├── examine_vcf.ipynb
+│   │   └── test_sgkit.ipynb
+│   ├── Notes.md
+│   ├── report/
+│   │   ├── README.md
+│   │   ├── Todreas_Project_Presentation.pdf
+│   │   ├── Todreas_Project_Report.pdf
+│   │   └── Todreas_Report.tex
+│   └── Todreas_Submission.zip
+├── environment.yml
+├── LICENSE
+├── README.md
+├── results/
+│   ├── plot.pdf
+│   └── stats.csv
 ├── scripts/
 │   ├── gzVCF_toFilter_toZarr.sh
 │   └── Zarr_toXArray_toResults.py
-├── results/
-├── environment.yaml
-├── LICENSE
-└── README.md
+└── test/
+    ├── compute_summary_stats.sh
+    ├── make_test_data.sh
+    └── ProjTaxaSmall.vcf.gz
 ```
-
-where `data/` and `results/` are empty directories that you will populate.
 
 The scripts in `scripts/` are intended to be run sequentially, which is outlined in **Reproducible workflow: Run analyses**.
 
 This project is available on [GitHub](https://github.com/otodreas/FST_dxy/tree/main). The GitHub repo also has docs (including written report), test data and test results.
+
+## Test data
+
+The scripts can be run on `test
 
 ## Reproducible workflow
 
@@ -68,7 +86,7 @@ Run analyses:
 
 ```sh
 ./scripts/gzVCF_toFilter_toZarr.sh data/ProjTaxa.vcf.gz
-./scripts/Zarr_toXArray_toResults.py data/Filtered.vcz -o results/stats.csv -p plot.pdf
+./scripts/Zarr_toXArray_toResults.py data/Filtered.vcz -o results/stats.csv -p results/plot.pdf
 ```
 
 ### Entire pipeline
@@ -77,7 +95,7 @@ Before proceeding, `cd` into the root.
 
 ```sh
 conda env create -f environment.yml
-conda activate FST_dxy
+conda activate Todreas_FST_dxy
 chmod +x scripts/*
 ./scripts/gzVCF_toFilter_toZarr.sh data/ProjTaxa.vcf.gz
 ./scripts/Zarr_toXArray_toResults.py data/Filtered.vcz -o results/stats.csv -p results/plot.pdf
