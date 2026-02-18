@@ -105,3 +105,13 @@ chmod +x scripts/*
 ./scripts/gzVCF_toFilter_toZarr.sh data/ProjTaxa.vcf.gz
 ./scripts/Zarr_toXArray_toResults.py data/Filtered.vcz -o results/stats_reproduced.csv -p results/plot_reproduced.pdf
 ```
+
+### Pipeline for test dataset
+
+```sh
+conda env create -f environment.yml
+conda activate Todreas_FST_dxy
+chmod +x scripts/*
+./scripts/gzVCF_toFilter_toZarr.sh test/ProjTaxaSmall.vcf.gz
+./scripts/Zarr_toXArray_toResults.py test/Filtered.vcz -o results/stats_reproduced_test.csv -p results/plot_reproduced_test.pdf
+```
