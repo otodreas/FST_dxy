@@ -207,7 +207,7 @@ marimo/_lsp/
 __marimo__/
 
 # Project data
-data/
+data/*
 test/*
 !/test/*.sh
-!/test/ProjTaxa.vcf.gz
+!/test/ProjTaxaSmall.vcf.gz
