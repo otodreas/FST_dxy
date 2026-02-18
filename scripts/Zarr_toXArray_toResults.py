@@ -292,7 +292,7 @@ def main():
     Parse command line arguments, load data into xarray.Datasets, merge new
     dimensions into xarray.Datasets, create and save plots and outputs in csv
     """
-    window_size = 20#1_250
+    window_size = 1_250
 
     args = parse_args()
     ds = load_data(args)
