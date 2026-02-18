@@ -2,6 +2,8 @@
 
 Project for BINP28 at Lund University's masters in bioinformatics that compares FST and dxy across the genome.
 
+
+
 ## Requirements
 
 With a Linux 64-bit platform, you can build my conda environment form `./environment.yml`, which is explained below.
@@ -14,6 +16,8 @@ If your system does not match or the environment build doesn't work, you can bui
 - `python=3.12`
 - `sgkit=0.10`
 - `matplotlib=3.10`
+
+I do not host the dataset, but it should be available at Lund University's bioinformatics server.
 
 ## Directory structure
 
