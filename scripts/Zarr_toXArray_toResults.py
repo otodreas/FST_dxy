@@ -73,7 +73,7 @@ def parse_args() -> ap.Namespace:
         if not os.path.isdir(os.path.dirname(args.plot)):
             sys.exit("Plot directory does not exist")
 
-        if not args.plot.endswith((".png", ".pdf", ".jpeg", ".jpg", ".svg")):
+        if not args.plot.endswith((".png", ".pdf", ".png/", ".pdf/")):
             sys.exit("Invalid plot filetype")
 
     # Return parsed arguments

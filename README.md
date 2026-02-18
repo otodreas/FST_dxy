@@ -63,7 +63,9 @@ def main():
 
 Below are comprehensive steps to run the workflow. If you prefer, scroll to the bottom to find the entire, uninterrupted list of commands.
 
-`cd` into the root directory for the **entirety of this workflow**.
+### Clone repo
+
+Clone the repo and `cd` into the root directory for the **entirety of this workflow**.
 
 ```sh
 cd ~/FST_dxy/
