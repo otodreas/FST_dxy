@@ -39,8 +39,6 @@ FST_dxy/
 
 The scripts in `./scripts/` are intended to be run sequentially, which is outlined in **Reproducible workflow: Run analyses**.
 
-This project is available on [GitHub](https://github.com/otodreas/FST_dxy/tree/main). The GitHub repo also has docs (including written report), test data and test results.
-
 ## Test data
 
 The scripts can be run on `./test/ProjTaxaSmall.vcf.gz`, but use a **window size of 20 variants**. Since window size is hard-coded for reproducibility, you will need to change it on line `295` of `./scripts/Zarr_toXArray_toResults.py`, inside the `main` function.
